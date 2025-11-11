@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Formulario</title>
 </head>
 <body>
@@ -59,6 +60,10 @@
             <input type="checkbox" name="preferencias" value="Promociones">Promociones<br/>
             <input type="checkbox" name="preferencias" value="Actualizaciones">Actualizaciones<br/>
             <input type="checkbox" name="preferencias" value="Eventos">Eventos<br/>
+        </div>
+         <div class="col-12">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+            <button type="reset" class="btn btn-secundary">Limpiar</button>
         </div>
     </form>
     </div>

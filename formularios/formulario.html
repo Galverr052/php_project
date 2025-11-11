@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <title>Formulario</title>
 </head>
 <body>
-    <h1>Formulario<h1>
+    <h1 class="text-3xl text-font-bold bg-gray-400 ">Formulario<h1>
     <div>
     <form action="" method="post" class="row g-3">
         <div class="col-12 col-md-6">
@@ -59,6 +61,12 @@
             <input type="checkbox" name="preferencias" value="Promociones">Promociones<br/>
             <input type="checkbox" name="preferencias" value="Actualizaciones">Actualizaciones<br/>
             <input type="checkbox" name="preferencias" value="Eventos">Eventos<br/>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+         <div class="col-12">
+            <button type="reset" class="btn btn-secundary">Enviar</button>
         </div>
     </form>
     </div>

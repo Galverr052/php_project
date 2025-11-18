@@ -34,7 +34,7 @@
 
                 if (in_array($tipo, $permitidos)) {
                     if (move_uploaded_file($_FILES["archivo"]["tmp_name"], $archivo)) {
-                        echo "<p class='text-green-600 font-semibold mt-4'>✅ Imagen subida correctamente: 
+                        echo "<p class='text-green-600 font-semibold mt-4'> ✓Imagen subida correctamente: 
                               <a href='$archivo' class='text-blue-500 underline'>Ver imagen</a></p>";
                     } else {
                         echo "<p class='text-red-600 mt-4'> Error al subir la imagen.</p>";

@@ -14,8 +14,8 @@
 
         <?php
         $proyectos = [
-            ["nombre" => "Ejercicio 1", "descripcion" => "Página HTML básica", "enlace" => "#"],
-            ["nombre" => "Ejercicio 2", "descripcion" => "Formulario de contacto", "enlace" => "#"],
+            ["nombre" => "Ejercicio 1", "descripcion" => "Una página web que muestre la fecha actual en castellano.", "enlace" => "\php_project\Actividades\Ejercicio1.1.php"],
+            ["nombre" => "Ejercicio 2", "descripcion" => "Tabla de 10 por 10 con los números del 1 al 100 ", "enlace" => "\php_project\Actividades\Ejercicio1.2.php"],
             ["nombre" => "Ejercicio 3", "descripcion" => "Lectura de archivos con PHP", "enlace" => "#"]
         ];
         ?>

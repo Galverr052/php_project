@@ -10,11 +10,11 @@
     <?php include("includes/menu.php"); ?>
 
     <main class="max-w-3xl mx-auto p-6 text-center">
-        <h1 class="text-3xl font-bold mb-4">Has tenido el privilegio de acceder a mi BLOG PERSONAL. agradeceme.</h1>
-        <img src="img/foto.jpg" alt="Mi foto" class="mx-auto rounded-full w-40 h-40 object-cover mb-4">
+        <h1 class="text-3xl font-bold mb-4">BIENVENIDO A MI BLOG</h1>
+        <img src="img/perfil.png" alt="Mi foto" class="mx-auto rounded-full w-40 h-40 object-cover mb-4">
         <p class="text-lg"><strong>Nombre:</strong> German Alvarenga</p>
         <p class="mb-2">Desarrollador web apasionado por la tecnología y el aprendizaje constante.</p>
-        <p><strong>Contacto:</strong> juanperez@example.com</p>
+        <p><strong>Contacto:</strong> galverr52@g.educaand.es</p>
     </main>
 
     <?php include("includes/footer.php"); ?>

@@ -14,9 +14,13 @@
 
         <?php
         $proyectos = [
-            ["nombre" => "Ejercicio 1", "descripcion" => "Una página web que muestre la fecha actual en castellano.", "enlace" => "\php_project\Actividades\Ejercicio1.1.php"],
-            ["nombre" => "Ejercicio 2", "descripcion" => "Tabla de 10 por 10 con los números del 1 al 100 ", "enlace" => "\php_project\Actividades\Ejercicio1.2.php"],
-            ["nombre" => "Ejercicio 3", "descripcion" => "Lectura de archivos con PHP", "enlace" => "#"]
+            ["nombre" => "Ejercicio 1", "descripcion" => "Una página web que muestre la fecha actual en castellano.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.1.php"],
+            ["nombre" => "Ejercicio 2", "descripcion" => "Tabla de 10 por 10 con los números del 1 al 100 ", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.2.php"],
+            ["nombre" => "Ejercicio 3", "descripcion" => "Formulario que recibe nombre y edad y muestra si el usuario es mayor o menor de edad.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.3.php"],
+            ["nombre" => "Ejercicio 4", "descripcion" => "Formulario que calcula el salario neto a partir del salario bruto y el porcentaje de retención.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.4.php"],
+            ["nombre" => "Ejercicio 5", "descripcion" => "Formulario que indica si un número introducido es positivo, negativo o cero.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.5.php"],
+            ["nombre" => "Ejercicio 6", "descripcion" => "Script que genera una nota aleatoria entre 1 y 10 y muestra la calificación correspondiente.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.6.php"],
+            ["nombre" => "Ejercicio 7", "descripcion" => "Formulario que muestra un texto en etiquetas HTML h1 a h6 usando un bucle for.", "enlace" => "\php_project\blog_personal\Actividades\Ejercicio1.7.php"]
         ];
         ?>
 

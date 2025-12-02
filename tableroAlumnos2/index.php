@@ -35,6 +35,33 @@ function getTableroMarkup($tablero) {
     return $html;
 }
 
+function getPersonaje($tableroMarkup, $row, $col) {
+    if (!is_numeric($row) || !is_numeric($col)) return $tableroMarkup;
+
+    $row = intval($row);
+    $col = intval($col);
+
+    $dom = new DOMDocument();
+    libxml_use_internal_errors(true); 
+    $dom->loadHTML('<div id="contenedor">'.$tableroMarkup.'</div>');
+    libxml_clear_errors();
+
+    $tiles = $dom->getElementById('contenedor')->getElementsByTagName('div');
+    $cols = 12; 
+    $index = $row * $cols + $col;
+
+    if (isset($tiles[$index])) {
+        $img = $dom->createElement('img');
+        $img->setAttribute('src', './src/mario.png');
+        $tiles[$index]->appendChild($img);
+    }
+    $nuevoHTML = '';
+    foreach ($tiles as $tile) {
+        $nuevoHTML .= $dom->saveHTML($tile);
+    }
+    return $nuevoHTML;
+}
+
 //Función lógica de negocio
 function leerArchivoCSV($rutaArchivoCSV) {
     $tablero = [];
@@ -53,6 +80,10 @@ function leerArchivoCSV($rutaArchivoCSV) {
     return $tablero;
 }
 
+$mensaje = "";
+if ($row === null || $col === null) {
+    $mensaje = "No se ha puesto ninguna posición al personaje.";
+}
 
 //Lógica de negocio
 
@@ -60,9 +91,11 @@ $tablero = leerArchivoCSV("./data/tablero1.csv");
 
 $tableroMarkup = getTableroMarkup($tablero);
 
-//Lógica de presentación
+// Recoger coordenadas de GET o POST
+$row = $_GET['row'] ?? $_POST['row'] ?? null;
+$col = $_GET['col'] ?? $_POST['col'] ?? null;
 
-
+$tableroMarkup = getPersonaje($tableroMarkup, $row, $col);
 
 ?>
 <!DOCTYPE html>
@@ -92,6 +125,9 @@ $tableroMarkup = getTableroMarkup($tablero);
             background-size: 209px;
             background-repeat: none;
         }
+        .img{
+            max-width:100%;
+        }
         .fuego {
             background-color: red;
             background-position: -105px -52px;
@@ -120,6 +156,7 @@ $tableroMarkup = getTableroMarkup($tablero);
 </head>
 <body>
     <h1>Tablero juego super rol DWES</h1>
+    <div class="mesajesContainer"><p><?php echo $mensaje; ?></p></div>
     <div class="contenedorTablero">
         <?php echo $tableroMarkup; ?>
     </div>

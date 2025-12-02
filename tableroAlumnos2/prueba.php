@@ -1,23 +1,19 @@
 <?php
-
 /* Inicialización del entorno */
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-/* Zona de declaración de funciones */
-//Funciones de debugueo
+/* Funciones de debug */
 function dump($var){
     echo '<pre>'.print_r($var,1).'</pre>';
 }
 
-//Función lógica presentación
+/* Función lógica presentación: genera el tablero HTML */
 function getTableroMarkup($tablero) {
     $html = "";
-
     foreach ($tablero as $fila) {
         foreach ($fila as $celda) {
-
             switch ($celda) {
                 case 'fuego':  $tipo = 'fuego'; break;
                 case 'tierra': $tipo = 'tierra'; break;
@@ -27,43 +23,76 @@ function getTableroMarkup($tablero) {
                 case 'ladrilloP': $tipo = 'ladrilloP'; break;
                 default:       $tipo = ''; break;
             }
-
             $html .= "<div class='tile $tipo'></div>";
         }
     }
-
     return $html;
 }
 
-//Función lógica de negocio
+/* Función lógica de negocio: leer CSV */
 function leerArchivoCSV($rutaArchivoCSV) {
     $tablero = [];
-
     if (($f = fopen($rutaArchivoCSV, "r")) !== false) {
         while (($fila = fgetcsv($f, 0, ",")) !== false) {
-
-            // Eliminar comillas si las hubiera
             $fila = array_map(fn($v) => trim($v, '"'), $fila);
-
             $tablero[] = $fila;
         }
         fclose($f);
     }
-
     return $tablero;
 }
 
+/* Función que inserta el personaje en la posición deseada */
+function getPersonaje($tableroMarkup, $row, $col) {
+    if (!is_numeric($row) || !is_numeric($col)) return $tableroMarkup;
 
-//Lógica de negocio
+    $row = intval($row);
+    $col = intval($col);
 
+    // Dividir el HTML por tiles
+    $dom = new DOMDocument();
+    libxml_use_internal_errors(true); // evitar warnings por HTML5
+    $dom->loadHTML('<div id="contenedor">'.$tableroMarkup.'</div>');
+    libxml_clear_errors();
+
+    $tiles = $dom->getElementById('contenedor')->getElementsByTagName('div');
+    $cols = 12; // columnas del tablero
+    $index = $row * $cols + $col;
+
+    if (isset($tiles[$index])) {
+        $img = $dom->createElement('img');
+        $img->setAttribute('src', './src/mario.png');
+        $tiles[$index]->appendChild($img);
+    }
+
+    // Devolver HTML actualizado
+    $nuevoHTML = '';
+    foreach ($tiles as $tile) {
+        $nuevoHTML .= $dom->saveHTML($tile);
+    }
+    return $nuevoHTML;
+}
+
+/* --- Lógica principal --- */
+
+// Leer el CSV
 $tablero = leerArchivoCSV("./data/tablero1.csv");
 
+// Generar HTML del tablero
 $tableroMarkup = getTableroMarkup($tablero);
 
-//Lógica de presentación
+// Recoger coordenadas de GET o POST
+$row = $_GET['row'] ?? $_POST['row'] ?? null;
+$col = $_GET['col'] ?? $_POST['col'] ?? null;
 
+// Mensaje por defecto
+$mensaje = "";
+if ($row === null || $col === null) {
+    $mensaje = "No se ha puesto ninguna posición al personaje.";
+}
 
-
+// Insertar personaje
+$tableroMarkup = getPersonaje($tableroMarkup, $row, $col);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,6 +120,9 @@ $tableroMarkup = getTableroMarkup($tablero);
             background-image: url("./src/464.jpg");
             background-size: 209px;
             background-repeat: none;
+        }
+        .img{
+            max-width:100%;
         }
         .fuego {
             background-color: red;
@@ -120,6 +152,7 @@ $tableroMarkup = getTableroMarkup($tablero);
 </head>
 <body>
     <h1>Tablero juego super rol DWES</h1>
+    <div class="mesajesContainer"><p><?php echo $mensaje; ?></p></div>
     <div class="contenedorTablero">
         <?php echo $tableroMarkup; ?>
     </div>

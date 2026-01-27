@@ -42,119 +42,130 @@ function leerArchivoCSV($rutaArchivoCSV) {
     return $tablero;
 }
 
-/* Función que inserta el personaje en la posición deseada */
-function getPersonaje($tableroMarkup, $row, $col) {
-    if (!is_numeric($row) || !is_numeric($col)) return $tableroMarkup;
+/* Inserta personaje */
+function getPersonaje($tablero, $row, $col) {
+    $cols = count($tablero[0]); // número de columnas
+    $nuevoHTML = "";
 
-    $row = intval($row);
-    $col = intval($col);
-
-    // Dividir el HTML por tiles
-    $dom = new DOMDocument();
-    libxml_use_internal_errors(true); // evitar warnings por HTML5
-    $dom->loadHTML('<div id="contenedor">'.$tableroMarkup.'</div>');
-    libxml_clear_errors();
-
-    $tiles = $dom->getElementById('contenedor')->getElementsByTagName('div');
-    $cols = 12; // columnas del tablero
-    $index = $row * $cols + $col;
-
-    if (isset($tiles[$index])) {
-        $img = $dom->createElement('img');
-        $img->setAttribute('src', './src/mario.png');
-        $tiles[$index]->appendChild($img);
+    foreach ($tablero as $r => $fila) {
+        foreach ($fila as $c => $celda) {
+            $tipo = $celda; 
+            $nuevoHTML .= "<div class='tile $tipo'>";
+            if ($r === $row && $c === $col) {
+                $nuevoHTML .= "<img src='./src/mario.png' class='img'>";
+            }
+            $nuevoHTML .= "</div>";
+        }
     }
 
-    // Devolver HTML actualizado
-    $nuevoHTML = '';
-    foreach ($tiles as $tile) {
-        $nuevoHTML .= $dom->saveHTML($tile);
-    }
     return $nuevoHTML;
 }
 
-/* --- Lógica principal --- */
+function getNewPosicion($row, $col, $mov){
+    switch ($mov) {
+        case 'up':
+            if ($row > 0) $row--;
+            break;
 
-// Leer el CSV
-$tablero = leerArchivoCSV("./data/tablero1.csv");
+        case 'down':
+            if ($row < 11) $row++;
+            break;
 
-// Generar HTML del tablero
-$tableroMarkup = getTableroMarkup($tablero);
+        case 'left':
+            if ($col > 0) $col--;
+            break;
 
-// Recoger coordenadas de GET o POST
-$row = $_GET['row'] ?? $_POST['row'] ?? null;
-$col = $_GET['col'] ?? $_POST['col'] ?? null;
-
-// Mensaje por defecto
-$mensaje = "";
-if ($row === null || $col === null) {
-    $mensaje = "No se ha puesto ninguna posición al personaje.";
+        case 'right':
+            if ($col < 11) $col++;
+            break;
+    }
+    return [$row, $col];
 }
 
-// Insertar personaje
-$tableroMarkup = getPersonaje($tableroMarkup, $row, $col);
+/* Botones con enlaces */
+function pintarBotonesMarkup($row, $col){
+    return '
+        <div style="text-align:center; margin-top:20px;">
+            <a href="?row='.($row-1).'&col='.$col.'&mov=up">Arriba</a>
+            <a href="?row='.$row.'&col='.($col-1).'&mov=left">Izquierda</a>
+            <a href="?row='.$row.'&col='.($col+1).'&mov=right">Derecha</a>
+            <a href="?row='.($row+1).'&col='.$col.'&mov=down">Abajo</a>
+        </div>
+    ';
+}
+
+
+// Leer tablero
+$tablero = leerArchivoCSV("./data/tablero1.csv");
+
+// Coordenadas
+$row = isset($_GET['row']) ? intval($_GET['row']) : null;
+$col = isset($_GET['col']) ? intval($_GET['col']) : null;
+
+$mensaje = "";
+if ($row === null || $col === null) {
+    $mensaje = "No se ha puesto ninguna posición al personaje";
+    }else if ($row < 0 || $col < 0 || $row > 11 || $col > 11) {
+    $mensaje = "Personaje fuera del tablero.";
+}
+
+// Mostrar el tablero normal
+$tableroMarkup = getTableroMarkup($tablero);
+
+// Añadir personaje si hay coordenadas
+if ($row !== null && $col !== null) {
+   $tableroMarkup = getPersonaje($tablero, $row, $col);
+
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Minified version -->
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
-    <title>Document</title>
+    <title>Juego DWES</title>
+
     <style>
         .contenedorTablero {
             width:600px;
             height:600px;
             border: solid 2px grey;
-            box-shadow: grey;
             display:grid;
             grid-template-columns: repeat(12, 1fr);
             grid-template-rows: repeat(12, 1fr);
         }
-        .tile {
-            float: left;
-            margin: 0;
-            padding: 0;
-            border-width: 0;
+        .tile { 
             background-image: url("./src/464.jpg");
             background-size: 209px;
-            background-repeat: none;
         }
-        .img{
-            max-width:100%;
-        }
-        .fuego {
-            background-color: red;
-            background-position: -105px -52px;
-        }
-        .tierra {
-            background-color: brown;
-            background-position: -157px 0px;
-        }
-        .agua {
-            background-color: blue;
-            background-position: -53px 0px;
-        }
-        .hierba {
-            background-color: green;
-            background-position: 0px 0px;
-        }
-        .piedra {
-            background-color: gray;
-            background-position: 0px 104px;
-        }
-        .ladrilloP {
-            background-color: gray;
-            background-position: 0px -157px;
-        }
+        .img { width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display:block;
+        margin:auto;
+        pointer-events: none; }
+        .fuego { background-position: -105px -52px; }
+        .tierra { background-position: -157px 0px; }
+        .agua { background-position: -53px 0px; }
+        .hierba { background-position: 0px 0px; }
+        .piedra { background-position: 0px 104px; }
+        .ladrilloP { background-position: 0px -157px; }
     </style>
+
 </head>
 <body>
-    <h1>Tablero juego super rol DWES</h1>
-    <div class="mesajesContainer"><p><?php echo $mensaje; ?></p></div>
-    <div class="contenedorTablero">
-        <?php echo $tableroMarkup; ?>
-    </div>
+
+<h1>Tablero juego super rol DWES</h1>
+
+<p><?= $mensaje ?></p>
+
+<?= pintarBotonesMarkup($row, $col) ?>
+
+<div class="contenedorTablero">
+    <?= $tableroMarkup ?>
+</div>
+
 </body>
 </html>

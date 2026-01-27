@@ -1,23 +1,19 @@
 <?php
-
 /* Inicialización del entorno */
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-/* Zona de declaración de funciones */
-//Funciones de debugueo
+/* Funciones de debug */
 function dump($var){
     echo '<pre>'.print_r($var,1).'</pre>';
 }
 
-//Función lógica presentación
+/* Función lógica presentación: genera el tablero HTML */
 function getTableroMarkup($tablero) {
     $html = "";
-
     foreach ($tablero as $fila) {
         foreach ($fila as $celda) {
-
             switch ($celda) {
                 case 'fuego':  $tipo = 'fuego'; break;
                 case 'tierra': $tipo = 'tierra'; break;
@@ -27,75 +23,100 @@ function getTableroMarkup($tablero) {
                 case 'ladrilloP': $tipo = 'ladrilloP'; break;
                 default:       $tipo = ''; break;
             }
-
             $html .= "<div class='tile $tipo'></div>";
         }
     }
-
     return $html;
 }
 
-function getPersonaje($tableroMarkup, $row, $col) {
-    if (!is_numeric($row) || !is_numeric($col)) return $tableroMarkup;
-
-    $row = intval($row);
-    $col = intval($col);
-
-    $dom = new DOMDocument();
-    libxml_use_internal_errors(true); 
-    $dom->loadHTML('<div id="contenedor">'.$tableroMarkup.'</div>');
-    libxml_clear_errors();
-
-    $tiles = $dom->getElementById('contenedor')->getElementsByTagName('div');
-    $cols = 12; 
-    $index = $row * $cols + $col;
-
-    if (isset($tiles[$index])) {
-        $img = $dom->createElement('img');
-        $img->setAttribute('src', './src/mario.png');
-        $tiles[$index]->appendChild($img);
-    }
-    $nuevoHTML = '';
-    foreach ($tiles as $tile) {
-        $nuevoHTML .= $dom->saveHTML($tile);
-    }
-    return $nuevoHTML;
-}
-
-//Función lógica de negocio
+/* Función lógica de negocio: leer CSV */
 function leerArchivoCSV($rutaArchivoCSV) {
     $tablero = [];
-
     if (($f = fopen($rutaArchivoCSV, "r")) !== false) {
         while (($fila = fgetcsv($f, 0, ",")) !== false) {
-
-            // Eliminar comillas si las hubiera
             $fila = array_map(fn($v) => trim($v, '"'), $fila);
-
             $tablero[] = $fila;
         }
         fclose($f);
     }
-
     return $tablero;
 }
+
+/* Inserta personaje */
+function getPersonaje($tablero, $row, $col) {
+    $cols = count($tablero[0]); 
+    $nuevoHTML = "";
+
+    foreach ($tablero as $r => $fila) {
+        foreach ($fila as $c => $celda) {
+            $tipo = $celda; 
+            $nuevoHTML .= "<div class='tile $tipo'>";
+            if ($r === $row && $c === $col) {
+                $nuevoHTML .= "<img src='./src/mario.png' class='img'>";
+            }
+            $nuevoHTML .= "</div>";
+        }
+    }
+
+    return $nuevoHTML;
+}
+
+function getNewPosicion($row, $col, $pos){
+    switch ($pos) {
+        case 'up':
+            if ($row > 0) $row--;
+            break;
+
+        case 'down':
+            if ($row < 11) $row++;
+            break;
+
+        case 'left':
+            if ($col > 0) $col--;
+            break;
+
+        case 'right':
+            if ($col < 11) $col++;
+            break;
+    }
+    return [$row, $col];
+}
+
+function pintarBotonesMarkup($row, $col){
+    return '
+        <div style="text-align:center; margin-top:20px; font-size:30px">
+            <p class="">CONTROL</p>
+            <a href="?row='.($row-1).'&col='.$col.'&pos=up">▲</a><br>
+            <a href="?row='.$row.'&col='.($col-1).'&pos=left">◀</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="?row='.$row.'&col='.($col+1).'&pos=right">▶</a><br>
+            <a href="?row='.($row+1).'&col='.$col.'&pos=down">▼</a><br>
+        </div>
+    ';
+}
+
+
+// Leer tablero
+$tablero = leerArchivoCSV("./data/tablero1.csv");
+
+// Coordenadas
+$row = isset($_GET['row']) ? intval($_GET['row']) : null;
+$col = isset($_GET['col']) ? intval($_GET['col']) : null;
 
 $mensaje = "";
 if ($row === null || $col === null) {
     $mensaje = "No se ha puesto ninguna posición al personaje.";
+    } else if ($row < 0 || $col < 0 || $row > 11 || $col > 11) {
+    $mensaje = "Personaje fuera del tablero.";
 }
 
-//Lógica de negocio
-
-$tablero = leerArchivoCSV("./data/tablero1.csv");
-
+// Mostrar el tablero normal
 $tableroMarkup = getTableroMarkup($tablero);
 
-// Recoger coordenadas de GET o POST
-$row = $_GET['row'] ?? $_POST['row'] ?? null;
-$col = $_GET['col'] ?? $_POST['col'] ?? null;
+// Añadir personaje si hay coordenadas
+if ($row !== null && $col !== null) {
+   $tableroMarkup = getPersonaje($tablero, $row, $col);
 
-$tableroMarkup = getPersonaje($tableroMarkup, $row, $col);
+}
 
 ?>
 <!DOCTYPE html>
@@ -103,62 +124,58 @@ $tableroMarkup = getPersonaje($tableroMarkup, $row, $col);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Minified version -->
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
-    <title>Document</title>
+    <title>Juego DWES</title>
+
     <style>
+        body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    }
+    p.{}
         .contenedorTablero {
             width:600px;
             height:600px;
             border: solid 2px grey;
-            box-shadow: grey;
             display:grid;
             grid-template-columns: repeat(12, 1fr);
             grid-template-rows: repeat(12, 1fr);
+            margin: 10px;
         }
-        .tile {
-            float: left;
-            margin: 0;
-            padding: 0;
-            border-width: 0;
+        .tile { 
             background-image: url("./src/464.jpg");
             background-size: 209px;
-            background-repeat: none;
         }
-        .img{
-            max-width:100%;
-        }
-        .fuego {
-            background-color: red;
-            background-position: -105px -52px;
-        }
-        .tierra {
-            background-color: brown;
-            background-position: -157px 0px;
-        }
-        .agua {
-            background-color: blue;
-            background-position: -53px 0px;
-        }
-        .hierba {
-            background-color: green;
-            background-position: 0px 0px;
-        }
-        .piedra {
-            background-color: gray;
-            background-position: 0px 104px;
-        }
-        .ladrilloP {
-            background-color: gray;
-            background-position: 0px -157px;
-        }
+        .img { width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display:block;
+        margin:auto;
+        opacity:100%;
+        pointer-events: none; }
+        .fuego { background-position: -105px -52px; }
+        .tierra { background-position: -157px 0px; }
+        .agua { background-position: -53px 0px; }
+        .hierba { background-position: 0px 0px; }
+        .piedra { background-position: 0px 104px; }
+        .ladrilloP { background-position: 0px -157px; }
     </style>
+
 </head>
 <body>
-    <h1>Tablero juego super rol DWES</h1>
-    <div class="mesajesContainer"><p><?php echo $mensaje; ?></p></div>
-    <div class="contenedorTablero">
-        <?php echo $tableroMarkup; ?>
-    </div>
+
+<h1>Tablero juego super rol DWES</h1>
+
+<p><?= $mensaje ?></p>
+
+<?= pintarBotonesMarkup($row, $col) ?>
+
+<div class="contenedorTablero">
+    <?= $tableroMarkup ?>
+</div>
+
 </body>
 </html>

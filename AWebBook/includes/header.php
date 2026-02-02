@@ -1,3 +1,11 @@
+<?php
+// Inicia sesión solo si no hay sesión activa
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,17 +25,19 @@
     </style>
 </head>
 
-<?php
-
-
-?>
 
 <body>
     <div class="bg-warning-subtle">
-        <form class="d-flex justify-content-end p-2" action="login.php" method="post">
-            <input type='hidden' name='logout' value='salir'>
-            <button type="submit" class="btn btn-dark">Iniciar sesión</button>
+        <!-- Botón de sesión dinámico -->
+        <form class="d-flex justify-content-end p-2" action="logout.php" method="post">
+            <?php if(isset($_SESSION['usuario'])): ?>
+                <button type="submit" class="btn btn-dark">Cerrar sesión</button>
+            <?php else: ?>
+                <a href="login.php" class="btn btn-dark">Iniciar sesión</a>
+            <?php endif; ?>
         </form>
+
+        <!-- Cabecera con logo -->
         <header class="cabecera d-flex align-items-center justify-content-center p-4">
             <img src="./img/logo-biblio.png" class="img-fluid logo me-2" alt="Logo IES">
             <h1 class="titulo">Bienvenido a la Biblioteca Virtual</h1>

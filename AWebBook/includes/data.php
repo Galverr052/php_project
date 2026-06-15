@@ -90,8 +90,8 @@ function guardarNuevoUsuario($nombre, $email, $password, $db){
 	password_verify($password, $password_segura);
 
 	// Consulta INSERT para guardar el usuario
-	$sqlInsert = "INSERT INTO usuarios (nombre, email, contraseña) 
-                  VALUES ('$nombre','$email', '$password_segura')";
+	$sqlInsert = "INSERT INTO usuarios (nombre_usuario, email, password, is_admin) 
+              VALUES ('$nombre','$email', '$password_segura', 0)";
 
 	// Ejecutamos la consulta
 	$query = mysqli_query($db, $sqlInsert);
@@ -133,5 +133,41 @@ function getUsers($db){
 
 	// Devolvemos todos los usuarios
 	return $resultado;
+}
+
+function crearResena($db, $id_usuario, $id_libro, $puntuacion, $comentario){
+
+    $puntuacion = intval($puntuacion);
+    $comentario = mysqli_real_escape_string($db, $comentario);
+
+    if($puntuacion < 0 || $puntuacion > 5){
+        return false;
+    }
+
+    $sql = "INSERT INTO resenas (id_usuario, id_libro, puntuacion, comentario)
+            VALUES ($id_usuario, $id_libro, $puntuacion, '$comentario')";
+
+    return mysqli_query($db, $sql);
+}
+
+function getResenasLibro($db, $id_libro){
+
+    $sql = "SELECT r.*, u.nombre_usuario
+            FROM resenas r
+            JOIN usuarios u ON r.id_usuario = u.id_usuario
+            WHERE r.id_libro = $id_libro
+            ORDER BY r.fecha DESC";
+
+    $res = mysqli_query($db, $sql);
+
+    $resenas = [];
+
+    if($res && mysqli_num_rows($res) > 0){
+        while($row = mysqli_fetch_assoc($res)){
+            $resenas[] = $row;
+        }
+    }
+
+    return $resenas;
 }
 ?>
